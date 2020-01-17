@@ -24,11 +24,30 @@ app.get('/',(req,res)=>{
 // })
 
 app.get('/users',(req,res)=>{
-    mysqldb.query(`select * from users`,(err,result)=>{
+    mysqldb.query(`select u.*,r.nama as rolename from users u left join roles r on u.roleid=r.id`,(err,result)=>{
         if (err) res.status(500).send(err)
-        res.status(200).send(result)
+        mysqldb.query('select * from roles',(err,result1)=>{
+            if (err) res.status(500).send(err)
+            res.status(200).send({datauser:result,datarole:result1})
+        })
     })
 })
+
+
+app.put('/users/:id',(req,res)=>{
+    mysqldb.query(`update users set ? where id=${req.params.id}`,req.body,(err,result)=>{
+        if (err) res.status(500).send(err)
+        mysqldb.query(`select u.*,r.nama as rolename from users u left join roles r on u.roleid=r.id`,(err,result1)=>{
+            if (err) res.status(500).send(err)
+            mysqldb.query('select * from roles',(err,result2)=>{
+                if (err) res.status(500).send(err)
+                res.status(200).send({datauser:result1,datarole:result2})
+            })
+        })
+    })
+})
+
+
 
 app.post('/users/:terserah',(req,res)=>{
     console.log(req.body)
