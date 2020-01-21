@@ -15,13 +15,16 @@ app.use(BodyParser.urlencoded({ extended: false }));
 app.use(BodyParser.json())
 app.use(express.static('public'))
 
-const {userRouters}=require('./routers')
+const {
+    userRouters,
+    AuthRouters
+}=require('./routers')
 
 app.get('/',(req,res)=>{
     return res.status(200).send('<h1>Selamat datang di api ini</h1>')
 })
 
-
+app.use('/auth',AuthRouters)
 app.use('/user',userRouters)
 
 
