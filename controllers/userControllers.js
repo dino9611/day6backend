@@ -68,6 +68,7 @@ module.exports={
     },
     postUsers:(req,res)=>{
         try {
+            console.log(req.user)
             const path = '/users/images'; //file save path
             const upload = uploader(path, 'USERS').fields([{ name: 'image'}]); //uploader(path, 'default prefix')
     

@@ -2,6 +2,7 @@ const cryptogenerate=require('./../helper/encrypt')
 const {mysqldb}=require('./../connection')
 const transporter=require('./../helper/mailer')
 const fs=require('fs')
+const {createJWTToken}=require('./../helper/jwt')
 
 module.exports={
     belajarcrypto:(req,res)=>{
@@ -36,11 +37,20 @@ module.exports={
         })    
     },
     login:(req,res)=>{
-        var hashpassword=cryptogenerate(req.query.password)
-        var sql=`select * from users where username='${req.query.username}' and password='${hashpassword}'`
+        const {
+            username,
+            password
+        }=req.query
+        var hashpassword=cryptogenerate(password)
+        var sql=`select * from users where username='${username}' and password='${hashpassword}'`
         mysqldb.query(sql,(err,result)=>{
-            if (err) res.status(500).send(err)
-            res.send({message:'berhasil login',data:result})
+            if (err) res.status(500).send({status:'error',err})
+            if(result.length===0){
+                return res.status(200).send({status:'error',error: 'username or password incorect!'})
+            }
+            const token=createJWTToken({userid:result[0].id,username:result[0].username})
+            console.log(token)
+            return res.send({username,email:result[0].email,status:'success',token})
         })
     },
     sendmail:(req,res)=>{
