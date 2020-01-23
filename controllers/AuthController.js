@@ -105,5 +105,49 @@ module.exports={
                 })
             }
         })
-    }       
+    },
+    emailverifikasi:(req,res)=>{
+        var {username,password}=req.body
+        var sql=`select * from users where username='${username}'`
+        mysqldb.query(sql,(err,results)=>{
+            if(err) return res.status(500).send({status:'error',err})
+
+            if(results.length===0){
+                return res.status(500).send({status:'error',err1:'user not found'})
+            }
+            sql=`update users set status='verified' where username='${username}' and password='${password}'`
+            mysqldb.query(sql,(err,results2)=>{
+                if(err){
+                    return res.status(500).send({status:'error',err})
+                }
+                return res.status(200).send({username:results[0].username,email:results[0].email,status:'verified'})
+            })
+        })
+    },
+    resendEmailVer:(req,res)=>{
+        var {username,email}=req.body
+        var sql=`select username,password,email from users where username='${username}' and email='${email}'`
+        mysqldb.query(sql,(err,results)=>{
+            if(err) return res.status(500).send({status:'error',err})
+            if(results.length===0){
+                return res.status(500).send({status:'error',err:'user not found'})
+            }
+            var LinkVerifikasi=`http://localhost:3000/verified?username=${results[0].username}&password=${results[0].password}`
+            var mailoptions={
+                from:'Raja bajak laut <aldinorahman36@gmail.com>',
+                to:results[0].email,
+                subject:`verifikasi Email instagrin`,
+                html:`tolong klik link ini untuk verifikasi :
+                        <a href=${LinkVerifikasi}>Join instagrin</a>`
+            }
+            transporter.sendMail(mailoptions,(err2,res2)=>{
+                if(err2){
+                    console.log(err2)
+                    return res.status(500).send({status:'error',err:err2})
+                }
+                console.log(`success`)
+                return res.status(200).send({username,email,status:'unverified'})
+            })
+        })
+    },       
 }
