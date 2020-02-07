@@ -3,7 +3,10 @@ const app=express()
 const BodyParser=require('body-parser')
 const cors=require('cors')
 const bearerToken=require('express-bearer-token')
+const schedule=require('node-schedule')
 
+const {MongoClient,url}=require('./connection').mongodb
+const Assert=require('assert')
 
 const PORT=2020
 
@@ -15,7 +18,8 @@ app.use(express.static('public'))
 
 const {
     userRouters,
-    AuthRouters
+    AuthRouters,
+    MovieRouters
 }=require('./routers')
 
 app.get('/',(req,res)=>{
@@ -24,10 +28,20 @@ app.get('/',(req,res)=>{
 
 app.use('/auth',AuthRouters)
 app.use('/user',userRouters)
+app.use('/movie',MovieRouters)
 
 
+// var j =schedule.scheduleJob('*/1 * * * *', (firedate)=>{
+//     console.log('The answer to life, the universe, and everything!'+firedate);
+// });
 
-
+MongoClient.connect(url,{ useUnifiedTopology: true},(err,client)=>{
+    Assert.equal(null, err);
+    console.log("Connected successfully to server");
+    // const db = client.db('sample_mflix');
+  
+    client.close();
+})
 
 
 app.listen(PORT,()=>console.log(`aktif di port ${PORT}`))

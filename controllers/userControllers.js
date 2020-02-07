@@ -9,7 +9,7 @@ module.exports={
             if (err) res.status(500).send(err)
             mysqldb.query('select * from roles',(err,result1)=>{
                 if (err) res.status(500).send(err)
-                res.status(200).send({datauser:result,datarole:result1})
+                return res.status(200).send({datauser:result,datarole:result1})
             })
         })
     },
